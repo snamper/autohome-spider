@@ -14,7 +14,9 @@ class Command(BaseCommand):
         """
         parser.add_argument('--fmt', default='csv', choices=('csv', 'json'),
                             help='文件输出格式（默认：csv）')
-        parser.add_argument('--series-path', nargs='?', help='加载本地车系数据')
+        parser.add_argument('--series-path', nargs='?',
+                            default='dist/series.csv',
+                            help='加载本地车系数据（默认：dist/series.csv）')
 
     def handle(self, *args, **options):
         fmt = options['fmt']
@@ -22,15 +24,17 @@ class Command(BaseCommand):
 
         series = None
         if series_path is not None:
-            series = self.load_series(series_path)
+            try:
+                series = self.load_series(series_path)
+            except CommandError as e:
+                self.stderr.write('Warning: %s\n' % e.msg)
         spider = SpecsSpider(series=series)
-        spider.obtain()
 
         self.output(spider, fmt=fmt)
 
     def output(self, spider, fmt='csv'):
         """
-        :type spider: SeriesSpider
+        :type spider: SpecsSpider
         :type fmt: str
         """
         if not os.path.exists('dist'):
@@ -106,5 +110,5 @@ class Command(BaseCommand):
                 brand = Brand(int(_l[0]), _l[1], _l[2], '')
                 factory = Factory(int(_l[3]), _l[4], _l[5], brand)
                 series.append(Series(int(_l[6]), _l[7], _l[8], int(_l[9]),
-                                     int(_l[10]), factory=factory))
+                                     int(_l[10]), factory))
         return series

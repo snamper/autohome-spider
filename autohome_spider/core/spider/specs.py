@@ -14,24 +14,25 @@ class SpecsSpider(object):
         """
         :type series: list[Series]
         """
-        self.specs = []
+        self._specs = []
         """:type: list[Spec]"""
-        self.series = series
+        self._series = series
 
-    def obtain(self):
-        if self.series is None:
+    @property
+    def specs(self):
+        if self._series is None:
             spider = SeriesSpider()
-            spider.obtain()
-            self.series = spider.series
+            self._series = list(spider.series)
 
         with requests.session() as req:
-            for series in self.series:
+            for series in self._series:
                 url = self.url_tpl.format(series_id=series.series_id)
-                self._obtain(series, req.get(url))
+                yield from self._obtain(series, req.get(url))
 
     def _obtain(self, series, resp):
         for _y in resp.json()['result']['yearitems']:
             for _s in _y['specitems']:
                 spec = Spec(_s['id'], _s['name'], _y['name'], _s['state'],
                             _s['minprice'], _s['maxprice'], series=series)
-                self.specs.append(spec)
+                self._specs.append(spec)
+                yield spec

@@ -7,6 +7,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 
 install_requires = [
     'requests',
+    'beautifulsoup4',
 ]
 
 

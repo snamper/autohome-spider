@@ -12,10 +12,11 @@ class BrandsSpider(object):
     url = 'https://www.autohome.com.cn/ashx/AjaxIndexCarFind.ashx?type=11'
 
     def __init__(self):
-        self.brands = []
+        self._brands = []
         """:type: list[Brand]"""
 
-    def obtain(self, logo=True):
+    @property
+    def brands(self, logo=True):
         with requests.session() as req:
             resp = req.get(self.url)
             for _b in resp.json()['result']['branditems']:
@@ -24,4 +25,5 @@ class BrandsSpider(object):
                 if logo:
                     logo_resp = req.get(_b['logo'])
                     brand.brand_logo = b64encode(logo_resp.content).decode()
-                self.brands.append(brand)
+                self._brands.append(brand)
+                yield brand

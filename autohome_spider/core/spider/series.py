@@ -14,30 +14,35 @@ class SeriesSpider(object):
         """
         :type brands: list[Brand]
         """
-        self.factories = []
+        self._factories = []
         """:type: list[Factory]"""
-        self.series = []
+        self._series = []
         """:type: list[Series]"""
-        self.brands = brands
+        self._brands = brands
 
-    def obtain(self):
-        if self.brands is None:
+    @property
+    def series(self):
+        if self._brands is None:
             spider = BrandsSpider()
-            spider.obtain(logo=False)
-            self.brands = spider.brands
+            self._brands = list(spider.brands)
 
         with requests.session() as req:
-            for brand in self.brands:
+            for brand in self._brands:
                 url = self.url_tpl.format(brand_id=brand.brand_id)
-                self._obtain(brand, req.get(url))
+                yield from self._obtain(brand, req.get(url))
+
+    @property
+    def factories(self):
+        return self._factories
 
     def _obtain(self, brand, resp):
         for _f in resp.json()['result']['factoryitems']:
             factory = Factory(_f['id'], _f['name'], _f['firstletter'], brand)
-            self.factories.append(factory)
+            self._factories.append(factory)
 
             for _s in _f['seriesitems']:
                 series = Series(_s['id'], _s['name'], _s['firstletter'],
                                 _s['seriesstate'], _s['seriesorder'],
                                 factory=factory)
-                self.series.append(series)
+                self._series.append(series)
+                yield series

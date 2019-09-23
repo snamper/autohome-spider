@@ -19,7 +19,6 @@ class Command(BaseCommand):
         fmt = options['fmt']
 
         spider = BrandsSpider()
-        spider.obtain()
 
         self.output(spider, fmt=fmt)
 

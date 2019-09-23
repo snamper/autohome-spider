@@ -14,7 +14,9 @@ class Command(BaseCommand):
         """
         parser.add_argument('--fmt', default='csv', choices=('csv', 'json'),
                             help='文件输出格式（默认：csv）')
-        parser.add_argument('--brands-path', nargs='?', help='加载本地品牌数据')
+        parser.add_argument('--brands-path', nargs='?',
+                            default='dist/brands.csv',
+                            help='加载本地品牌数据（默认：dist/brands.csv）')
 
     def handle(self, *args, **options):
         fmt = options['fmt']
@@ -22,10 +24,11 @@ class Command(BaseCommand):
 
         brands = None
         if brands_path:
-            brands = self.load_brands(brands_path)
-
+            try:
+                brands = self.load_brands(brands_path)
+            except CommandError as e:
+                self.stderr.write('Warning: %s\n' % e.msg)
         spider = SeriesSpider(brands=brands)
-        spider.obtain()
 
         self.output(spider, fmt=fmt)
 
@@ -47,23 +50,6 @@ class Command(BaseCommand):
         """
         :type spider: SeriesSpider
         """
-        with open('factories.csv', 'w+') as f:
-            f.write(','.join([
-                'brand_id,brand_name,brand_first_letter',
-                'factory_id,factory_name,factory_first_letter',
-            ]))
-            f.write('\n')
-            for _f in spider.factories:
-                f.write(','.join([
-                    str(_f.brand.brand_id),
-                    _f.brand.brand_name,
-                    _f.brand.brand_first_letter,
-                    str(_f.factory_id),
-                    _f.factory_name,
-                    _f.factory_first_letter,
-                ]))
-                f.write('\n')
-
         with open('series.csv', 'w+') as f:
             f.write(','.join([
                 'brand_id,brand_name,brand_first_letter',
@@ -85,6 +71,23 @@ class Command(BaseCommand):
                     _s.series_first_letter,
                     str(_s.series_state),
                     str(_s.series_order),
+                ]))
+                f.write('\n')
+
+        with open('factories.csv', 'w+') as f:
+            f.write(','.join([
+                'brand_id,brand_name,brand_first_letter',
+                'factory_id,factory_name,factory_first_letter',
+            ]))
+            f.write('\n')
+            for _f in spider.factories:
+                f.write(','.join([
+                    str(_f.brand.brand_id),
+                    _f.brand.brand_name,
+                    _f.brand.brand_first_letter,
+                    str(_f.factory_id),
+                    _f.factory_name,
+                    _f.factory_first_letter,
                 ]))
                 f.write('\n')
 
