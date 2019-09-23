@@ -1,3 +1,6 @@
+import re
+
+
 class Brand(object):
     def __init__(self, brand_id, brand_name, brand_first_letter, brand_logo):
         """
@@ -181,3 +184,9 @@ class Spec(object):
 
     def __eq__(self, other):
         return self.spec_id == other.spec_id
+
+    def __setattr__(self, key, value):
+        if isinstance(value, str):
+            value = ' '.join([_.strip() for _ in value.split('\n')])
+            value = re.sub(' +', ' ', value)
+        super().__setattr__(key, value)
