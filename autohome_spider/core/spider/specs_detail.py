@@ -148,6 +148,8 @@ class SpecParser(object):
             spec.energy_type = value
         elif prop == '上市时间':
             spec.marketed_time = value
+        elif prop == '厂商指导价(元)':
+            spec.guide_price = value
         elif prop == '长*宽*高(mm)':
             _tmp = value.split('*') + ['', '']
             try:
@@ -191,6 +193,8 @@ class SpecParser(object):
             pass
         elif prop == '高度(mm)':
             spec.height = value
+        elif prop == '宽度(mm)':
+            spec.width = value
         elif prop == '轴距(mm)':
             spec.wheelbase = value
         elif prop == '前轮距(mm)':
@@ -232,6 +236,11 @@ class SpecParser(object):
             pass
         elif prop == '排量(L)':
             spec.displacement = value
+        elif prop == '排量(mL)':
+            try:
+                spec.displacement = float(value) / 1000
+            except ValueError:
+                pass
         elif prop == '进气形式':
             spec.intake_form = value
         elif prop == '气缸排列形式':
@@ -327,6 +336,8 @@ class SpecParser(object):
             pass
         elif prop == '驻车制动类型':
             spec.brake_type = value
+        elif prop == '后制动器类型':
+            spec.real_brake_type = value
         elif prop == '前轮胎规格':
             spec.front_tire_specification = value
         elif prop == '后轮胎规格':
@@ -792,6 +803,8 @@ class SpecParser(object):
             pass
         elif prop in ['工信部纯电续航里程(km)', '工信部续航里程(km)']:
             spec.official_range = value
+        elif prop == '电动机总功率(kW)':
+            spec.motor_total_power = value
         elif prop == '电动机总扭矩(N·m)':
             spec.motor_total_torque = value
         elif prop == '前电动机最大功率(kW)':
