@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 from ..structure import Brand, Factory, Series, Spec
@@ -59,6 +60,7 @@ class Command(BaseCommand):
             head_line += ['series_id', 'series_name', 'series_first_letter',
                           'series_state', 'series_order']
             head_line += spec_properties
+            head_line.append('md5_sum')
             f.write(','.join(head_line))
             f.write('\n')
             for spec in spider.specs:
@@ -75,7 +77,9 @@ class Command(BaseCommand):
                          str(spec.series.series_state),
                          str(spec.series.series_order)]
                 line += [str(getattr(spec, _, '')) for _ in spec_properties]
-                f.write(','.join(line))
+                line = ','.join(line)
+                md5_sum = hashlib.md5(line.encode()).hexdigest()
+                f.write('%s,%s' % (line, md5_sum))
                 f.write('\n')
 
     @classmethod
